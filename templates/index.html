@@ -3,57 +3,170 @@
 <head>
     <title>Expense Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #f0f2f5;
-            --card-bg: white;
-            --text: #333;
-            --navbar: linear-gradient(135deg, #667eea, #764ba2);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        [data-theme="dark"] {
-            --bg: #1a1a2e;
-            --card-bg: #16213e;
-            --text: #eee;
-            --navbar: linear-gradient(135deg, #0f3460, #533483);
+        :root {
+            --bg: #0d1f1a;
+            --card-bg: #132b23;
+            --card-bg2: #0f2318;
+            --text: #d4ede3;
+            --text-muted: #6b9e87;
+            --mint: #3fffa2;
+            --mint-dim: rgba(63,255,162,0.15);
+            --green-mid: #1a7a4a;
+            --border: rgba(63,255,162,0.12);
+            --navbar: linear-gradient(135deg, #0a1f16, #0d2b1e);
         }
 
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            transition: all 0.3s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse at top right, rgba(63,255,162,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom left, rgba(26,122,74,0.08) 0%, transparent 60%);
         }
 
+        /* ── Navbar ── */
         .navbar-custom {
             background: var(--navbar);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
         }
 
+        .navbar-brand-text {
+            font-family: 'Fraunces', serif;
+            font-size: 22px;
+            color: var(--mint) !important;
+            letter-spacing: 0.5px;
+        }
+
+        .user-chip {
+            background: var(--mint-dim);
+            border: 1px solid var(--border);
+            color: var(--mint);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .dark-toggle {
+            cursor: pointer;
+            background: rgba(63,255,162,0.08);
+            border: 1px solid var(--border);
+            color: var(--mint);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .dark-toggle:hover {
+            background: var(--mint-dim);
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid rgba(63,255,162,0.3);
+            color: var(--text-muted);
+            border-radius: 20px;
+            padding: 4px 16px;
+            font-size: 13px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--mint);
+            color: var(--mint);
+        }
+
+        /* ── Summary Cards ── */
         .card {
-            background-color: var(--card-bg);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             color: var(--text);
-            transition: all 0.3s ease;
         }
 
         .card-income {
-            background: linear-gradient(135deg, #11998e, #38ef7d) !important;
+            background: linear-gradient(135deg, #0d3d2a, #1a6640) !important;
+            border: 1px solid rgba(63,255,162,0.25) !important;
+            border-radius: 16px;
             color: white !important;
-            border-radius: 15px;
             animation: slideIn 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-income::after {
+            content: '💰';
+            position: absolute;
+            right: 16px; top: 12px;
+            font-size: 28px;
+            opacity: 0.4;
         }
 
         .card-expense {
-            background: linear-gradient(135deg, #eb3349, #f45c43) !important;
+            background: linear-gradient(135deg, #3d1515, #6b2626) !important;
+            border: 1px solid rgba(255,100,100,0.25) !important;
+            border-radius: 16px;
             color: white !important;
-            border-radius: 15px;
             animation: slideIn 0.6s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-expense::after {
+            content: '📉';
+            position: absolute;
+            right: 16px; top: 12px;
+            font-size: 28px;
+            opacity: 0.4;
         }
 
         .card-savings {
-            background: linear-gradient(135deg, #4776e6, #8e54e9) !important;
+            background: linear-gradient(135deg, #0d2d3d, #1a5266) !important;
+            border: 1px solid rgba(100,200,255,0.25) !important;
+            border-radius: 16px;
             color: white !important;
-            border-radius: 15px;
             animation: slideIn 0.7s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-savings::after {
+            content: '🏦';
+            position: absolute;
+            right: 16px; top: 12px;
+            font-size: 28px;
+            opacity: 0.4;
+        }
+
+        .card-income:hover, .card-expense:hover, .card-savings:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+
+        .summary-amount {
+            font-family: 'Fraunces', serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
         }
 
         @keyframes slideIn {
@@ -61,77 +174,191 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .card-income:hover, .card-expense:hover, .card-savings:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-
-        .form-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: none;
+        /* ── Progress Bar ── */
+        .form-card, .table-card, .insight-card-wrap {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
             animation: slideIn 0.8s ease;
         }
 
-        .table-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: none;
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 10px;
-        }
-
-        .btn-add:hover {
-            opacity: 0.9;
-            color: white;
-            transform: scale(1.02);
-        }
-
-        .dark-toggle {
-            cursor: pointer;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            border-radius: 20px;
-            padding: 5px 15px;
-            font-size: 14px;
-        }
-
-        .insight-card {
-            border-left: 4px solid #667eea;
-            border-radius: 10px;
-            animation: slideIn 0.9s ease;
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            color: var(--mint);
+            margin-bottom: 16px;
         }
 
         .progress {
-            height: 12px;
+            height: 10px;
             border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+        }
+
+        .budget-warning {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* ── Insights ── */
+        .insight-card-wrap {
+            border-left: 3px solid var(--mint);
+        }
+
+        .insight-item {
+            font-size: 14px;
+            color: var(--text);
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .insight-item:last-child { border-bottom: none; }
+
+        /* ── Form ── */
+        .form-label-custom {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 8px !important;
+            color: var(--text) !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 14px !important;
+            padding: 10px 14px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .form-control::placeholder { color: rgba(212,237,227,0.25) !important; }
+
+        .form-control:focus, .form-select:focus {
+            border-color: rgba(63,255,162,0.5) !important;
+            box-shadow: 0 0 0 3px rgba(63,255,162,0.08) !important;
+            background: rgba(63,255,162,0.04) !important;
+        }
+
+        .form-select option {
+            background: #132b23;
+            color: var(--text);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #1a7a4a, #3fffa2);
+            color: #0a1f16;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(63,255,162,0.2);
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(63,255,162,0.35);
+        }
+
+        /* ── Table ── */
+        .table-card {
+            padding: 24px;
         }
 
         table {
             color: var(--text) !important;
         }
 
-        .form-control, .form-select {
-            background-color: var(--card-bg) !important;
-            color: var(--text) !important;
-            border-color: #dee2e6;
+        thead tr {
+            border-bottom: 2px solid var(--border);
         }
+
+        th {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted) !important;
+            font-weight: 600;
+            padding-bottom: 12px !important;
+        }
+
+        td {
+            font-size: 14px;
+            padding: 12px 8px !important;
+            border-bottom: 1px solid var(--border) !important;
+            vertical-align: middle !important;
+        }
+
+        tr:last-child td { border-bottom: none !important; }
+
+        .badge-income {
+            background: rgba(63,255,162,0.15);
+            color: #3fffa2;
+            border: 1px solid rgba(63,255,162,0.3);
+            border-radius: 20px;
+            padding: 3px 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-expense {
+            background: rgba(255,100,100,0.15);
+            color: #ff8080;
+            border: 1px solid rgba(255,100,100,0.3);
+            border-radius: 20px;
+            padding: 3px 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: 1px solid rgba(255,100,100,0.3);
+            color: #ff8080;
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 12px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: rgba(255,100,100,0.1);
+            color: #ff6060;
+            border-color: rgba(255,100,100,0.6);
+        }
+
+        .container { padding-top: 24px; padding-bottom: 40px; }
     </style>
 </head>
 <body>
 
 <!-- Navbar -->
-<nav class="navbar navbar-custom mb-4">
+<nav class="navbar-custom">
     <div class="container d-flex justify-content-between align-items-center">
-        <span class="navbar-brand text-white fw-bold fs-4">💰 Expense Tracker</span>
-        <button class="dark-toggle" onclick="toggleDark()">🌙 Dark Mode</button>
+        <span class="navbar-brand-text">🌿 Expense Tracker</span>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="user-chip">👤 {{ current_user.username }}</span>
+            <button class="dark-toggle" onclick="toggleDark()">🌙 Dark Mode</button>
+            <a href="/archive" class="btn-logout">🗓️ Archive</a>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
     </div>
 </nav>
 
@@ -141,88 +368,94 @@
     <div class="row mb-4">
         <div class="col-md-4 mb-3">
             <div class="card card-income p-4">
-                <h6>💵 Total Income</h6>
-                <h2 class="text-white">₹{{ total_income }}</h2>
+                <div class="summary-label">Total Income</div>
+                <div class="summary-amount">₹{{ total_income }}</div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
             <div class="card card-expense p-4">
-                <h6>💸 Total Expense</h6>
-                <h2 class="text-white">₹{{ total_expense }}</h2>
+                <div class="summary-label">Total Expense</div>
+                <div class="summary-amount">₹{{ total_expense }}</div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
             <div class="card card-savings p-4">
-                <h6>🏦 Net Savings</h6>
-                <h2 class="text-white">₹{{ savings }}</h2>
+                <div class="summary-label">Net Savings</div>
+                <div class="summary-amount">₹{{ savings }}</div>
             </div>
         </div>
     </div>
 
-    <!-- Budget Progress Bar -->
-    <div class="card form-card p-4 mb-4">
-        <h5>📊 Budget Usage — {{ percentage }}%</h5>
-        <div class="progress mt-2">
+    <!-- Budget Progress -->
+    <div class="form-card">
+        <div class="section-title">📊 Budget Usage — {{ percentage }}%</div>
+        <div class="progress">
             <div class="progress-bar
                 {% if percentage >= 80 %}bg-danger
                 {% elif percentage >= 50 %}bg-warning
                 {% else %}bg-success{% endif %}"
                 role="progressbar"
-                style="width: {{ percentage }}%">
+                style="width: {{ [percentage, 100]|min }}%">
             </div>
         </div>
-        <small class="mt-2 d-block">{{ warning }}</small>
+        <small class="budget-warning mt-2 d-block">{{ warning }}</small>
     </div>
 
     <!-- Smart Insights -->
     {% if insights %}
-    <div class="card insight-card p-4 mb-4">
-        <h5>🧠 Smart Insights</h5>
+    <div class="insight-card-wrap">
+        <div class="section-title">🧠 Smart Insights</div>
         {% for insight in insights %}
-        <p class="mb-1">{{ insight }}</p>
+        <div class="insight-item">{{ insight }}</div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Form -->
-    <div class="card form-card p-4 mb-4">
-        <h5 class="mb-3">➕ Add Transaction</h5>
+    <!-- Add Transaction Form -->
+    <div class="form-card">
+        <div class="section-title">➕ Add Transaction</div>
         <form method="POST" action="/add">
             <div class="row">
                 <div class="col-md-3 mb-2">
-                    <input type="text" name="title" class="form-control" placeholder="Title (e.g. Zomato)">
+                    <label class="form-label-custom">Title</label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. Zomato" required>
                 </div>
                 <div class="col-md-2 mb-2">
-                    <input type="number" name="amount" class="form-control" placeholder="Amount">
+                    <label class="form-label-custom">Amount</label>
+                    <input type="number" name="amount" class="form-control" placeholder="₹" required>
                 </div>
                 <div class="col-md-3 mb-2">
+                    <label class="form-label-custom">Category</label>
                     <select name="category" class="form-select">
                         <option>Food</option>
                         <option>Travel</option>
-                        <option>Bills</option>
                         <option>Shopping</option>
-                        <option>Salary</option>
+                        <option>Bills</option>
+                        <option>Health</option>
+                        <option>Education</option>
+                        <option>Entertainment</option>
                         <option>Other</option>
                     </select>
                 </div>
                 <div class="col-md-2 mb-2">
+                    <label class="form-label-custom">Type</label>
                     <select name="type" class="form-select">
-                        <option>Expense</option>
                         <option>Income</option>
+                        <option>Expense</option>
                     </select>
                 </div>
-                <div class="col-md-2 mb-2">
-                    <button type="submit" class="btn btn-add w-100">Add</button>
+                <div class="col-md-2 mb-2 d-flex align-items-end">
+                    <button type="submit" class="btn-add w-100">Add</button>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- Transactions -->
-    <div class="card table-card p-4">
-        <h5 class="mb-3">📋 Transactions</h5>
+    <!-- Transactions Table -->
+    <div class="table-card">
+        <div class="section-title">📋 Transactions</div>
         <table class="table table-hover">
-            <thead class="table-light">
+            <thead>
                 <tr>
                     <th>Title</th>
                     <th>Amount</th>
@@ -239,13 +472,13 @@
                     <td>{{ t.category }}</td>
                     <td>
                         {% if t.type == 'Income' %}
-                        <span class="badge bg-success">Income</span>
+                        <span class="badge-income">Income</span>
                         {% else %}
-                        <span class="badge bg-danger">Expense</span>
+                        <span class="badge-expense">Expense</span>
                         {% endif %}
                     </td>
                     <td>
-                        <a href="/delete/{{ t.id }}" class="btn btn-sm btn-outline-danger">🗑 Delete</a>
+                        <a href="/delete/{{ t.id }}" class="btn-delete">🗑 Delete</a>
                     </td>
                 </tr>
                 {% endfor %}

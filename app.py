@@ -1,11 +1,27 @@
-from flask import Flask, render_template, request, redirect
+from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from bcrypt import hashpw, checkpw, gensalt
 import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///expense.db')
+app.secret_key = 'shruti_expense_tracker_2026'
+uri = os.environ.get('DATABASE_URL', 'sqlite:///expense.db')
+if uri.startswith('postgres://'):
+    uri = uri.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+# Models
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(200))
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -13,13 +29,54 @@ class Transaction(db.Model):
     amount = db.Column(db.Float)
     category = db.Column(db.String(50))
     type = db.Column(db.String(20))
-
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    date = db.Column(db.DateTime, default=datetime.utcnow)
 with app.app_context():
     db.create_all()
 
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
+
+# Register
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password'].encode('utf-8')
+        hashed = hashpw(password, gensalt())
+        user = User(username=username, password=hashed.decode('utf-8'))
+        db.session.add(user)
+        db.session.commit()
+        login_user(user)
+        return redirect(url_for('home'))
+    return render_template('register.html')
+
+# Login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password'].encode('utf-8')
+        user = User.query.filter_by(username=username).first()
+        if user and checkpw(password, user.password.encode('utf-8')):
+            login_user(user)
+            return redirect(url_for('home'))
+        flash('Invalid username or password!')
+    return render_template('login.html')
+
+# Logout
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+# Home
 @app.route('/')
+@login_required
 def home():
-    transactions = Transaction.query.all()
+    transactions = Transaction.query.filter_by(user_id=current_user.id).all()
     transactions_list = [{'id': t.id, 'title': t.title, 'amount': t.amount, 'category': t.category, 'type': t.type} for t in transactions]
 
     total_income = sum(t['amount'] for t in transactions_list if t['type'] == 'Income')
@@ -85,25 +142,65 @@ def home():
                          warning=warning,
                          percentage=round(percentage, 1),
                          insights=insights)
+# Archive
+@app.route('/archive')
+@login_required
+def archive():
+    transactions = Transaction.query.filter_by(
+        user_id=current_user.id
+    ).all()
+
+    # Group by month-year
+    monthly = {}
+    for t in transactions:
+        key = t.date.strftime('%B %Y')  # e.g. "March 2026"
+        if key not in monthly:
+            monthly[key] = []
+        monthly[key].append(t)
+
+    # Calculate stats per month
+    archive_data = {}
+    for month, txns in monthly.items():
+        income = sum(t.amount for t in txns if t.type == 'Income')
+        expense = sum(t.amount for t in txns if t.type == 'Expense')
+        archive_data[month] = {
+            'transactions': [{'title': t.title, 'amount': t.amount,
+                             'category': t.category, 'type': t.type,
+                             'date': t.date.strftime('%d %b')} for t in txns],
+            'income': income,
+            'expense': expense,
+            'savings': income - expense
+        }
+
+    # Sort latest month first
+    from collections import OrderedDict
+    archive_data = OrderedDict(
+        sorted(archive_data.items(),
+               key=lambda x: datetime.strptime(x[0], '%B %Y'),
+               reverse=True)
+    )
+
+    return render_template('archive.html', archive_data=archive_data)
 
 @app.route('/add', methods=['POST'])
+@login_required
 def add():
     title = request.form['title']
     amount = float(request.form['amount'])
     category = request.form['category']
     type = request.form['type']
-
-    t = Transaction(title=title, amount=amount, category=category, type=type)
+    t = Transaction(title=title, amount=amount, category=category, type=type, user_id=current_user.id)
     db.session.add(t)
     db.session.commit()
-
     return redirect('/')
 
 @app.route('/delete/<int:id>')
+@login_required
 def delete(id):
     t = Transaction.query.get(id)
-    db.session.delete(t)
-    db.session.commit()
+    if t and t.user_id == current_user.id:
+        db.session.delete(t)
+        db.session.commit()
     return redirect('/')
 
 if __name__ == "__main__":

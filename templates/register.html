@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register - Expense Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #0a1628;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Jost', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background-image:
+                repeating-linear-gradient(
+                    45deg, transparent, transparent 60px,
+                    rgba(197,160,80,0.03) 60px,
+                    rgba(197,160,80,0.03) 61px
+                );
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: -120px; right: -120px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(197,160,80,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .register-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .register-card {
+            background: linear-gradient(160deg, #0f2040 0%, #0a1628 100%);
+            border-radius: 4px;
+            border: 1px solid rgba(197,160,80,0.25);
+            padding: 48px 40px;
+            position: relative;
+            box-shadow:
+                0 30px 80px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(197,160,80,0.2);
+        }
+
+        .register-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 10%; right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #c5a050, transparent);
+        }
+
+        .brand-area {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #c5a050, #e8c97a);
+            border-radius: 50%;
+            font-size: 22px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(197,160,80,0.3);
+        }
+
+        .brand-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: #f0e6cc;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            font-weight: 300;
+            color: rgba(197,160,80,0.7);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .gold-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .gold-divider span {
+            flex: 1; height: 1px;
+            background: rgba(197,160,80,0.2);
+        }
+        .gold-divider i {
+            color: rgba(197,160,80,0.5);
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-style: normal;
+            font-family: 'Jost', sans-serif;
+        }
+
+        .form-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(197,160,80,0.8);
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid rgba(197,160,80,0.2) !important;
+            border-radius: 3px !important;
+            color: #f0e6cc !important;
+            font-family: 'Jost', sans-serif !important;
+            font-size: 14px !important;
+            padding: 12px 16px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .form-control::placeholder {
+            color: rgba(240,230,204,0.25) !important;
+        }
+
+        .form-control:focus {
+            background: rgba(197,160,80,0.06) !important;
+            border-color: rgba(197,160,80,0.6) !important;
+            box-shadow: 0 0 0 3px rgba(197,160,80,0.08) !important;
+        }
+
+        .mb-3 { margin-bottom: 20px !important; }
+
+        .btn-register {
+            width: 100%;
+            background: linear-gradient(135deg, #c5a050, #e8c97a);
+            color: #0a1628;
+            border: none;
+            border-radius: 3px;
+            padding: 13px;
+            font-family: 'Jost', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            box-shadow: 0 4px 20px rgba(197,160,80,0.25);
+        }
+
+        .btn-register:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 28px rgba(197,160,80,0.4);
+            background: linear-gradient(135deg, #d4af60, #f0d98a);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: rgba(240,230,204,0.4);
+        }
+
+        .login-link a {
+            color: #c5a050;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .login-link a:hover { color: #e8c97a; }
+
+        .card-footer-deco {
+            position: absolute;
+            bottom: 16px; right: 20px;
+            display: flex; gap: 4px;
+        }
+        .card-footer-deco span {
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: rgba(197,160,80,0.3);
+        }
+        .card-footer-deco span:first-child {
+            background: rgba(197,160,80,0.6);
+        }
+    </style>
+</head>
+<body>
+<div class="register-wrapper">
+    <div class="register-card">
+
+        <div class="brand-area">
+            <div class="brand-icon">💰</div>
+            <div class="brand-title">Expense Tracker</div>
+            <div class="brand-subtitle">Personal Finance</div>
+        </div>
+
+        <div class="gold-divider">
+            <span></span>
+            <i>Create Account</i>
+            <span></span>
+        </div>
+
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Create a password" required>
+            </div>
+            <button type="submit" class="btn-register">Create Account</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="/login">Login here</a>
+        </div>
+
+        <div class="card-footer-deco">
+            <span></span><span></span><span></span>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
