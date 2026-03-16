@@ -2,14 +2,13 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-hashed = bcrypt.generate_password_hash(password).decode('utf-8')
-user = User(username=username, password=hashed)
 from flask_bcrypt import Bcrypt
-bcrypt = Bcrypt(app)
 import os
+from collections import OrderedDict
 
-app = Flask(__name__)
+app = Flask(_name_)
 app.secret_key = 'shruti_expense_tracker_2026'
+
 uri = os.environ.get('DATABASE_URL', 'sqlite:///expense.db')
 if uri.startswith('postgres://'):
     uri = uri.replace('postgres://', 'postgresql://', 1)
@@ -17,6 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -34,6 +34,7 @@ class Transaction(db.Model):
     type = db.Column(db.String(20))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     date = db.Column(db.DateTime, default=datetime.utcnow)
+
 with app.app_context():
     db.create_all()
 
@@ -80,7 +81,8 @@ def logout():
 @login_required
 def home():
     transactions = Transaction.query.filter_by(user_id=current_user.id).all()
-    transactions_list = [{'id': t.id, 'title': t.title, 'amount': t.amount, 'category': t.category, 'type': t.type} for t in transactions]
+    transactions_list = [{'id': t.id, 'title': t.title, 'amount': t.amount,
+                          'category': t.category, 'type': t.type} for t in transactions]
 
     total_income = sum(t['amount'] for t in transactions_list if t['type'] == 'Income')
     total_expense = sum(t['amount'] for t in transactions_list if t['type'] == 'Expense')
@@ -94,9 +96,9 @@ def home():
     if percentage >= 80:
         warning = "🔴 Alert! 80% budget used!"
     elif percentage >= 50:
-        warning = "⚠️ Warning! 50% budget used!"
+        warning = "🔺 Warning! 50% budget used!"
     else:
-        warning = "✅ Safe! You are within budget!"
+        warning = "🟢 Safe! You are within budget!"
 
     insights = []
     if transactions_list:
@@ -128,40 +130,61 @@ def home():
             for cat, amount in categories.items():
                 cat_percentage = (amount / total_income) * 100 if total_income > 0 else 0
                 if cat_percentage > 30:
-                    insights.append(f"💡 Tip: Reduce {cat} spending — it's {cat_percentage:.0f}% of your income!")
+                    insights.append(f"💡 Tip: Reduce {cat} spending - it's {cat_percentage:.0f}% of your income!")
 
         if percentage >= 80:
-            insights.append("🚨 Critical: You have spent 80% of income — stop non-essential spending!")
+            insights.append("🚨 Critical: You have spent 80% of income - stop non-essential spending!")
         elif percentage >= 60:
-            insights.append("⚠️ Warning: 60% budget used — avoid luxury expenses now!")
+            insights.append("⚠️ Warning: 60% budget used - avoid luxury expenses now!")
         elif percentage >= 40:
-            insights.append("📌 Note: 40% budget used — keep tracking!")
+            insights.append("📌 Note: 40% budget used - keep tracking!")
 
     return render_template('index.html',
-                         transactions=transactions_list,
-                         total_income=total_income,
-                         total_expense=total_expense,
-                         savings=savings,
-                         warning=warning,
-                         percentage=round(percentage, 1),
-                         insights=insights)
+                           transactions=transactions_list,
+                           total_income=total_income,
+                           total_expense=total_expense,
+                           savings=savings,
+                           warning=warning,
+                           percentage=round(percentage, 1),
+                           insights=insights)
+
+# Add Transaction
+@app.route('/add', methods=['POST'])
+@login_required
+def add():
+    title = request.form['title']
+    amount = float(request.form['amount'])
+    category = request.form['category']
+    type = request.form['type']
+    t = Transaction(title=title, amount=amount, category=category,
+                    type=type, user_id=current_user.id)
+    db.session.add(t)
+    db.session.commit()
+    return redirect('/')
+
+# Delete Transaction
+@app.route('/delete/<int:id>')
+@login_required
+def delete(id):
+    t = Transaction.query.get(id)
+    if t and t.user_id == current_user.id:
+        db.session.delete(t)
+        db.session.commit()
+    return redirect('/')
+
 # Archive
 @app.route('/archive')
 @login_required
 def archive():
-    transactions = Transaction.query.filter_by(
-        user_id=current_user.id
-    ).all()
+    transactions = Transaction.query.filter_by(user_id=current_user.id).all()
 
-    # Group by month-year
     monthly = {}
     for t in transactions:
-        key = t.date.strftime('%B %Y')  # e.g. "March 2026"
+        key = t.date.strftime('%B %Y')
         if key not in monthly:
             monthly[key] = []
         monthly[key].append(t)
 
-    # Calculate stats per month
     archive_data = {}
     for month, txns in monthly.items():
         income = sum(t.amount for t in txns if t.type == 'Income')
@@ -175,8 +198,6 @@ def archive():
             'savings': income - expense
         }
 
-    # Sort latest month first
-    from collections import OrderedDict
     archive_data = OrderedDict(
         sorted(archive_data.items(),
                key=lambda x: datetime.strptime(x[0], '%B %Y'),
@@ -185,26 +206,5 @@ def archive():
 
     return render_template('archive.html', archive_data=archive_data)
 
-@app.route('/add', methods=['POST'])
-@login_required
-def add():
-    title = request.form['title']
-    amount = float(request.form['amount'])
-    category = request.form['category']
-    type = request.form['type']
-    t = Transaction(title=title, amount=amount, category=category, type=type, user_id=current_user.id)
-    db.session.add(t)
-    db.session.commit()
-    return redirect('/')
-
-@app.route('/delete/<int:id>')
-@login_required
-def delete(id):
-    t = Transaction.query.get(id)
-    if t and t.user_id == current_user.id:
-        db.session.delete(t)
-        db.session.commit()
-    return redirect('/')
-
-if __name__ == "__main__":
+if _name_ == '_main_':
     app.run(debug=True)
