@@ -1,26 +1,29 @@
 from flask import Flask, render_template, request, redirect
-import mysql.connector
+from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///expense.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-def get_db():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="root1234",
-        database="expense_db"
-    )
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
+    amount = db.Column(db.Float)
+    category = db.Column(db.String(50))
+    type = db.Column(db.String(20))
+
+with app.app_context():
+    db.create_all()
 
 @app.route('/')
 def home():
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM transactions")
-    transactions = cursor.fetchall()
-    db.close()
+    transactions = Transaction.query.all()
+    transactions_list = [{'id': t.id, 'title': t.title, 'amount': t.amount, 'category': t.category, 'type': t.type} for t in transactions]
 
-    total_income = sum(float(t['amount']) for t in transactions if t['type'] == 'Income')
-    total_expense = sum(float(t['amount']) for t in transactions if t['type'] == 'Expense')
+    total_income = sum(t['amount'] for t in transactions_list if t['type'] == 'Income')
+    total_expense = sum(t['amount'] for t in transactions_list if t['type'] == 'Expense')
     savings = total_income - total_expense
 
     if total_income > 0:
@@ -35,14 +38,13 @@ def home():
     else:
         warning = "✅ Safe! You are within budget!"
 
-    # Smart AI Insights
     insights = []
-    if transactions:
+    if transactions_list:
         categories = {}
-        for t in transactions:
+        for t in transactions_list:
             if t['type'] == 'Expense':
                 cat = t['category']
-                categories[cat] = categories.get(cat, 0) + float(t['amount'])
+                categories[cat] = categories.get(cat, 0) + t['amount']
 
         if categories:
             top_category = max(categories, key=categories.get)
@@ -57,19 +59,17 @@ def home():
             elif saving_rate >= 10:
                 insights.append(f"⚠️ Save more! Currently saving only {saving_rate:.0f}%!")
             else:
-                insights.append(f"🔴 Danger! Saving only {saving_rate:.0f}%!-OVERSPENDING")
+                insights.append(f"🔴 Danger! Saving only {saving_rate:.0f}%!")
 
-        expense_count = len([t for t in transactions if t['type'] == 'Expense'])
+        expense_count = len([t for t in transactions_list if t['type'] == 'Expense'])
         insights.append(f"📊 Total {expense_count} expenses this month!")
 
-        # Category wise advice
         if categories:
             for cat, amount in categories.items():
                 cat_percentage = (amount / total_income) * 100 if total_income > 0 else 0
                 if cat_percentage > 30:
                     insights.append(f"💡 Tip: Reduce {cat} spending — it's {cat_percentage:.0f}% of your income!")
 
-        # Overall budget advice
         if percentage >= 80:
             insights.append("🚨 Critical: You have spent 80% of income — stop non-essential spending!")
         elif percentage >= 60:
@@ -78,7 +78,7 @@ def home():
             insights.append("📌 Note: 40% budget used — keep tracking!")
 
     return render_template('index.html',
-                         transactions=transactions,
+                         transactions=transactions_list,
                          total_income=total_income,
                          total_expense=total_expense,
                          savings=savings,
@@ -89,26 +89,21 @@ def home():
 @app.route('/add', methods=['POST'])
 def add():
     title = request.form['title']
-    amount = request.form['amount']
+    amount = float(request.form['amount'])
     category = request.form['category']
     type = request.form['type']
 
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("INSERT INTO transactions (title, amount, category, type) VALUES (%s, %s, %s, %s)",
-                   (title, amount, category, type))
-    db.commit()
-    db.close()
+    t = Transaction(title=title, amount=amount, category=category, type=type)
+    db.session.add(t)
+    db.session.commit()
 
     return redirect('/')
 
 @app.route('/delete/<int:id>')
 def delete(id):
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("DELETE FROM transactions WHERE id = %s", (id,))
-    db.commit()
-    db.close()
+    t = Transaction.query.get(id)
+    db.session.delete(t)
+    db.session.commit()
     return redirect('/')
 
 if __name__ == "__main__":
