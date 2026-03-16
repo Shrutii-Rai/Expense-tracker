@@ -6,7 +6,7 @@ from flask_bcrypt import Bcrypt
 import os
 from collections import OrderedDict
 
-app = Flask(_name_)
+app = Flask(__name__)
 app.secret_key = 'shruti_expense_tracker_2026'
 
 uri = os.environ.get('DATABASE_URL', 'sqlite:///expense.db')
@@ -206,5 +206,5 @@ def archive():
 
     return render_template('archive.html', archive_data=archive_data)
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     app.run(debug=True)
