@@ -2,7 +2,10 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from bcrypt import hashpw, checkpw, gensalt
+hashed = bcrypt.generate_password_hash(password).decode('utf-8')
+user = User(username=username, password=hashed)
+from flask_bcrypt import Bcrypt
+bcrypt = Bcrypt(app)
 import os
 
 app = Flask(__name__)
@@ -43,9 +46,9 @@ def load_user(user_id):
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password'].encode('utf-8')
-        hashed = hashpw(password, gensalt())
-        user = User(username=username, password=hashed.decode('utf-8'))
+        password = request.form['password']
+        hashed = bcrypt.generate_password_hash(password)
+        user = User(username=username, password=hashed)
         db.session.add(user)
         db.session.commit()
         login_user(user)
@@ -57,9 +60,9 @@ def register():
 def login():
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password'].encode('utf-8')
+        password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and checkpw(password, user.password.encode('utf-8')):
+        if user and bcrypt.check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('home'))
         flash('Invalid username or password!')
