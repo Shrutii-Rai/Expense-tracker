@@ -199,8 +199,7 @@
 
 <div class="container">
     <div class="page-title">🗓️ Monthly Archive</div>
-    <div class="page-subtitle">Har mahine ki transactions aur summary</div>
-
+    
     {% if archive_data %}
         {% for month, data in archive_data.items() %}
         <div class="month-block">
@@ -259,8 +258,8 @@
     {% else %}
         <div class="empty-state">
             <div class="icon">📭</div>
-            <h5>Koi transactions nahi mili</h5>
-            <p>Pehle kuch transactions add karo!</p>
+            <h5>No transaction found!</h5>
+            <p>First add any transaction</p>
         </div>
     {% endif %}
 
