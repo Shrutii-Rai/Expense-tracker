@@ -64,6 +64,12 @@ http://127.0.0.1:5000
 
 ---
 
+## 🎥 Demo Video
+
+▶️ Click below to watch the demo:
+
+👉 [Watch Demo on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7439746553939988480/)
+
 ## 📁 Project Structure
 
 ```
