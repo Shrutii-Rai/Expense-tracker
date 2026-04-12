@@ -8,12 +8,41 @@ A full-stack web application to track personal income and expenses, built with F
 
 ## ✨ Features
 
-- 🔐 User Authentication (Register / Login / Logout)
-- ➕ Add Income and Expense transactions
-- 📊 View transaction history
-- 🗑️ Delete transactions
-- 💾 Persistent data storage with PostgreSQL.
-- 📱 Responsive UI
+### 💰 Expense Management
+- ➕ Add, edit, and delete expenses
+- 🧾 Categorize expenses (Food, Travel, Bills, etc.)
+- 📅 Track daily transactions
+
+---
+
+### 📆 Monthly Archive
+- 🗂️ View expenses month-wise
+- 📊 Track monthly spending history
+- 🔍 Easy navigation between months
+
+---
+
+### 📊 Expense Summary
+- 💡 Overview of total spending
+- 📈 Quick insights into expenses
+
+---
+
+### 🔐 User Authentication
+- 👤 Secure login & logout system
+- 🔒 User-specific data protection
+
+---
+
+### 🗄️ Data Management
+- 💾 Persistent storage using PostgreSQL
+- 🔄 Efficient backend using Flask
+
+---
+
+### 🎨 User Experience
+- 💡 Clean and simple interface
+- ⚡ Fast and responsive performance
 
 ---
 
