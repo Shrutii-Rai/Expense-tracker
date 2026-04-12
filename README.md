@@ -47,6 +47,12 @@ cd Expense-tracker
 # 3. Install dependencies
 pip install -r requirements.txt
 
+
+# 3. Create virtual environment 
+python -m venv venv
+source venv/bin/activate   # For Linux/Mac
+venv\Scripts\activate      # For Windows
+
 # 4. Run the application
 python app.py
 ```
