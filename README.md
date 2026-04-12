@@ -2,8 +2,11 @@
 
 A full-stack web application to track personal income and expenses, built with Flask and PostgreSQL.
 
-🔗 **Live Demo:** [https://expense-tracker-lsia.onrender.com](https://expense-tracker-lsia.onrender.com)
+## 🚀 Live Demo
 
+🌐 [Try the App](https://expense-tracker-lsia.onrender.com)
+
+🎥 [Watch Demo Video](https://www.linkedin.com/feed/update/urn:li:activity:7439746553939988480/)
 ---
 
 ## ✨ Features
